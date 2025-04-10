@@ -1,0 +1,195 @@
+app.MapGet("/Lookup/{**path}", () =>
+    {
+        // Console.WriteLine("ParcelStatuses aaa");
+        Faker faker = new Faker();
+        List<Lookup> lookups = new List<Lookup>();
+        for (var i = 0; i < 15; i++)
+        {
+            var lookup = new Lookup()
+            {
+                Id = i,
+                NameEn = faker.Company.CompanyName(),
+                NameAr = faker.Name.FirstName()
+            };
+            lookups.Add(lookup);
+        }
+
+        var response = new LookupResponse()
+        {
+            IsSuccess = true,
+            Data = lookups,
+            Errors = null
+        };
+        return Results.Ok(response);
+    })
+    .WithName("Lookups");
+
+app.MapGet("/Parcel/GetByDate", (DateOnly start,DateOnly end,int pageNumber,int pageSize) =>
+    {
+        Faker faker = new Faker();
+        var totalIds = new List<int>();
+        for (int i = 0; i < 100; i++) // Let's assume 100 total items
+        {
+            totalIds.Add(faker.Random.Int(1, 10000));
+        }
+
+        // Calculate paging
+        int totalItems = totalIds.Count;
+        int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+        // Apply paging
+        var pagedIds = totalIds
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        // Create and return your ParcelIds object
+        var result = new ParcelIds
+        {
+            Ids = pagedIds,
+            TotalPages = totalPages
+        };
+
+        return Results.Ok(result);
+        
+    })
+    .WithName("ParcelGetByDate");
+
+app.MapGet("/Parcel/GetById", (int id) =>
+{
+    Faker faker = new Faker();
+    var parcelId = faker.Random.Int(1, 10000); 
+    var consigneeDetails = new ConsigneeDetails()
+    {
+        ParcelId= parcelId,
+        ConsigneeIdNumber=faker.Company.CompanyName(),
+        ConsigneeName=faker.Company.CompanyName(),
+        ConsigneeContactNumber=faker.Random.Int(1, 10000),
+        ConsigneeBirthDate=faker.Company.CompanyName(),
+        ConsigneeType=faker.Company.CompanyName(),
+        ConsigneeAddress=faker.Company.CompanyName(),
+        IsRemoteArea=faker.Random.Bool(),
+        RemoteAreaName=faker.Company.CompanyName(),
+    }; 
+    var financialDetails = new FinancialDetails()
+    {
+        ParcelId = parcelId,
+        PaymentType = faker.Random.Int(1, 10),
+        ItemsValue = faker.Random.Double(1, 10),
+        ShippingFees = faker.Random.Double(1, 10),
+        LandedCost = faker.Name.JobArea(),
+        PostpaidFees = faker.Name.FirstName(),
+        PostpaidAmount = faker.Random.Double(1, 10),
+        ServiceFees = faker.Name.FirstName(),
+        CustomDutyFees = faker.Name.FirstName(),
+        Vat = faker.Name.FirstName(),
+        ExciseTax = faker.Name.FirstName(),
+        TotalValue = faker.Name.FirstName(),
+        PaymentMethodId = faker.Name.FirstName(),
+    }; 
+    var shipperDetails = new ShipperDetails()
+    {
+        ParcelId = parcelId,
+        ShipperIdNumber = faker.Company.CompanyName(),
+        ShipperBirthDate = faker.Company.CompanyName(),
+        ShipperContactNumber = faker.Random.Int(1, 10),
+        ShipperName = faker.Company.CompanyName(),
+        ShipperType = faker.Company.CompanyName(),
+        ShipperAddress = faker.Company.CompanyName(),
+    }; 
+    var parcel = new Parcel()
+    {
+        ParcelId = faker.Random.Int(1,10),
+        ServiceProviderId = faker.Random.Int(1,10),
+        ShipperDetails = shipperDetails,
+        FinancialDetails = financialDetails,
+        ConsigneeDetails = consigneeDetails,
+        WayBillNumber = faker.Name.FirstName(),
+        ParcelCreationDate = faker.Date.Between(DateTime.Now.AddYears(-10),DateTime.Now),
+        ParcelType = faker.Random.Int(1,10),
+        ParcelStatus = faker.Random.Int(1,10),
+        IsEcommerceParcel = faker.Random.Bool(),
+        ParcelWeight = faker.Random.Double(1,10),
+        NumberOfPieces = faker.Random.Int(1,10),
+        SpecialHandling= faker.Random.Bool(),
+        ExpectedDeliveryDate= faker.Date.Between(DateTime.Now.AddYears(-10),DateTime.Now),
+        PickupDate= faker.Date.Between(DateTime.Now.AddYears(-10),DateTime.Now),
+        PickupType= faker.Random.Int(1,5),
+        DeliveryType= faker.Random.Int(1,5),
+        OriginCountry = faker.Random.Int(1,10),
+        OriginCity = faker.Random.Int(1,10),
+        DestinationCountry = faker.Random.Int(1,10),
+        DestinationCity = faker.Random.Int(1,10),
+    };
+    return Results.Ok(parcel);
+
+}).WithName("ParcelGetById");
+
+
+------------------------------------------------------------
+public class Parcel
+{
+    public int ParcelId { get; set; }
+    public int ServiceProviderId { get; set; }
+    public ShipperDetails? ShipperDetails { get; set; }
+    public FinancialDetails? FinancialDetails { get; set; }
+    public ConsigneeDetails? ConsigneeDetails { get; set; }
+    public string? WayBillNumber { get; set; }
+    public DateTime ParcelCreationDate { get; set; }
+    public int ParcelType { get; set; }
+    public int ParcelStatus { get; set; }
+    public bool IsEcommerceParcel { get; set; }
+    public double ParcelWeight { get; set; }
+    public int NumberOfPieces { get; set; }
+    
+    public bool? SpecialHandling { get; set; }
+    public DateTime? ExpectedDeliveryDate { get; set; }
+    public DateTime? PickupDate { get; set; }
+    public int? PickupType { get; set; }
+    public int? DeliveryType { get; set; } 
+    public int OriginCountry { get; set; }
+    public int OriginCity { get; set; }
+    public int DestinationCountry { get; set; }
+    public int DestinationCity { get; set; }
+}
+
+public class ConsigneeDetails
+{
+    public int ParcelId { get; set; }
+    public string? ConsigneeIdNumber { get; set; }
+    public string? ConsigneeName { get; set; }
+    public int ConsigneeContactNumber { get; set; }
+    public string? ConsigneeBirthDate { get; set; }
+    public string? ConsigneeType { get; set; }
+    public string? ConsigneeAddress { get; set; }
+    public bool IsRemoteArea { get; set; }
+    public string? RemoteAreaName { get; set; }
+}
+
+public class FinancialDetails
+{
+    public int ParcelId { get; set; }
+    public int PaymentType { get; set; }
+    public double ItemsValue { get; set; }
+    public double ShippingFees { get; set; }
+    public string? LandedCost { get; set; }
+    public string? PostpaidFees { get; set; }
+    public double PostpaidAmount { get; set; }
+    public string? ServiceFees { get; set; }
+    public string? CustomDutyFees { get; set; }
+    public string? Vat { get; set; }
+    public string? ExciseTax { get; set; }
+    public string? TotalValue { get; set; }
+    public string? PaymentMethodId { get; set; }
+}
+
+public class ShipperDetails
+{
+    public int ParcelId { get; set; }
+    public string? ShipperIdNumber { get; set; }
+    public string? ShipperBirthDate { get; set; }
+    public int ShipperContactNumber { get; set; }
+    public string? ShipperName { get; set; }
+    public string? ShipperType { get; set; }
+    public string? ShipperAddress { get; set; }
+}
