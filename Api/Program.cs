@@ -54,6 +54,7 @@ app.MapGet("/test", () =>
         return forecast;
     })
     .WithName("test");
+// test
 
 app.MapGet("/test2", () =>
     {
